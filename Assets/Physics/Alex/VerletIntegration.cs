@@ -15,7 +15,10 @@ namespace Alex
 		Vector3[] x_old; // Old particle positions
 		Vector3[] a; // Force Accumulators 
 
-		public int nrTimeSteps = 10; 
+
+		public float restLength = 100f; 
+
+		public int nrTimeSteps = 20; 
 		private int curTimeStep = 0; 
 
 		// Use this for initialization
@@ -27,19 +30,20 @@ namespace Alex
 			x_old = new Vector3[num_particles];
 			a = new Vector3[num_particles]; 
 
-			for (int i = 0; i < num_particles; i++) {
-				x [i] = start_x; 
+			for (int i = 0; i < num_particles; i++) 
+			{
+				x [i] = objs[i].transform.position; 
 				a [i] = start_a; 
-				x_old [i] = start_old_x; 
-				objs [i].transform.position = x [i]; 
+				x_old [i] = x[i] - start_old_x; 
+				//objs [i].transform.position = x [i]; 
 			}
 			
 		}
 		
 		// Update is called once per frame
-		void Update () 
+		void FixedUpdate () 
 		{
-			if (curTimeStep < nrTimeSteps)
+			//if (curTimeStep < nrTimeSteps)
 			{
 				TimeStep (); 
 				curTimeStep++; 
@@ -58,10 +62,12 @@ namespace Alex
 			for (int i = 0; i < x.Length; i++) 
 			{
 				Vector3 temp = x [i]; 
-				x [i] += x [i] - Gange(x_old [i], a [i]) * Time.deltaTime * Time.deltaTime; 
+				Vector3 _newPos = (x [i] -  x_old[i]) + a[i] * Time.fixedDeltaTime * Time.fixedDeltaTime;
+				//x [i] += x [i] -  Vector3.Scale(x_old[i], a[i]) * Time.fixedDeltaTime * Time.fixedDeltaTime; 
 				x_old [i] = temp; 
+				x [i] += _newPos; 
 				objs [i].transform.position = x [i]; 
-				GameObject.CreatePrimitive (PrimitiveType.Sphere); 
+				//GameObject.CreatePrimitive (PrimitiveType.Sphere).transform.position = x[i]; 
 			}
 		}
 
@@ -71,16 +77,20 @@ namespace Alex
 			{
 				a [i] = Physics.gravity; 
 			}
+
+			Vector3 delta = x[1] - x[0]; 
+			float deltaLength = Mathf.Sqrt(Vector3.Dot(delta,delta));
+			float diff = (deltaLength-restLength)/deltaLength; 
+			x[0] -= delta * 0.5f * diff; 
+			x[1] += delta * 0.5f * diff; 
 		}
 
 		private void CalcConstraints()
 		{
-			
-		}
-
-		private Vector3 Gange(Vector3 a, Vector3 b)
-		{
-			return new Vector3 (a.x * b.x, a.y * b.y, a.z * b.z);
+			for (int i = 0; i < x.Length; i++) 
+			{
+				x [i] = Vector3.Min (Vector3.Max (x[i], Vector3.zero), new Vector3 (1000, 1000, 1000)); 
+			}
 		}
 
 /*		private Vector3 Acceleration()
