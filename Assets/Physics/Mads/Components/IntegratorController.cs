@@ -5,6 +5,9 @@ namespace Mads
 {
     public class IntegratorController : MonoBehaviour
     {
+        [SerializeField]
+        private LatticeSpawner spawner = null;
+
         private IIntegrator<SimpleTransformParticle> integrator;
 
         public enum Simulate
@@ -21,6 +24,11 @@ namespace Mads
             integrator = new VerletIntegrator<SimpleTransformParticle>();
         }
 
+        private void Start()
+        {
+            Initialize();
+        }
+
         private void FixedUpdate()
         {
             Step();
@@ -31,8 +39,21 @@ namespace Mads
             }
         }
 
-        public void Initialize(IEnumerable<SimpleTransformParticle> particles)
+        public void Initialize()
         {
+            var transforms = spawner.SpawnLattice();
+            var particles = new List<SimpleTransformParticle>(transforms.Count);
+            foreach (var t in transforms)
+            {
+                var particle = new SimpleTransformParticle()
+                {
+                    transform = t,
+                    Position = t.position,
+                    PreviousPosition = t.position,
+                    mass = 1f
+                };
+                particles.Add(particle);
+            }
             integrator.Initialize(particles);
         }
 

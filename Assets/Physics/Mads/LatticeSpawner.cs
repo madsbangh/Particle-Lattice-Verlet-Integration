@@ -17,43 +17,44 @@ namespace Mads
         [SerializeField]
         private int zSize = 5;
 
-        private List<Transform> particles = new List<Transform>();
-        private bool dirty;
+        private Vector3 vertexA;
+        private Vector3 vertexB;
+        private Vector3 vertexC;
 
         private void OnValidate()
         {
             xSize = Mathf.Max(0, xSize);
             ySize = Mathf.Max(0, ySize);
             zSize = Mathf.Max(0, zSize);
-            dirty = true;
+
+            vertexA = Vector3.right * spacing;
+            vertexB = Quaternion.Euler(0f, 60f, 0f) * Vector3.right * spacing;
+            vertexC = Quaternion.Euler(0f, 30f, 0f) * (Quaternion.Euler(0f, 0f, 60f) * Vector3.right) * spacing;
         }
 
-        private void Update()
+        private void OnDrawGizmosSelected()
         {
-            if (dirty)
+            var rowOffset = false;
+            var colOffset = false;
+            for (int layer = 0; layer < ySize; layer++)
             {
-                foreach (var particle in particles)
+                for (int col = 0; col < xSize; col++)
                 {
-                    if (particle)
+                    for (int row = 0; row < zSize; row++)
                     {
-                        DestroyImmediate(particle.gameObject); 
+                        var v = col * vertexA + layer * vertexB + row * vertexC;
+
+                        Gizmos.DrawWireSphere(v, 0.5f);
                     }
+                    rowOffset = !rowOffset;
                 }
-                particles = SpawnLattice();
-                dirty = false;
+                colOffset = !colOffset;
             }
         }
 
         public List<Transform> SpawnLattice()
         {
             var particles = new List<Transform>(xSize * ySize * zSize);
-
-            var triangleHeight = spacing * Mathf.Sqrt(3f) / 2f;
-            var tetrahedronHeight = spacing * Mathf.Sqrt(6f) / 3f;
-
-            var vertexA = Vector3.right;
-            var vertexB = Quaternion.Euler(0f, 60f, 0f) * Vector3.right;
-            var vertexC = Quaternion.Euler(0f, 30f, 0f) * (Quaternion.Euler(0f, 0f, 60f) * Vector3.right);
 
             var rowOffset = false;
             var colOffset = false;
