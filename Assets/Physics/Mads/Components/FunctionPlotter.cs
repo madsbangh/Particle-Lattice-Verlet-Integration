@@ -71,13 +71,13 @@ public class FunctionPlotter : MonoBehaviour
                         val = Mads.Formulas.PushPullForceHyperbolic(x, mass, attraction, repulsion, sweetSpot, width);
                         break;
                     case Function.Gaussian:
-                        val = Mads.Formulas.Gaussian(x, sweetSpot, width);
+                        val = Mads.Formulas.Gaussian(x, sweetSpot, width) * attraction;
                         break;
                     case Function.GaussianDerivative:
-                        val = Mads.Formulas.GaussianDerivative(x, sweetSpot, width);
+                        val = Mads.Formulas.GaussianDerivative(x, sweetSpot, width) * attraction;
                         break;
                     case Function.PowDerivative:
-                        val = Mads.Formulas.PowDerivative(decay, x);
+                        val = Mads.Formulas.PowDerivative(decay, x) * repulsion;
                         break;
                     default:
                         val = 0f;
