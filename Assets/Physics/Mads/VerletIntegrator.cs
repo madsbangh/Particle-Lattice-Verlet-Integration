@@ -8,7 +8,7 @@ namespace Mads
         public float sigmaSquared = 1f;
         public float mu = 1f;
         public float decay = 0.25f;
-        public float repulsion = 1f;
+        public float repulsion = 10f;
         public float attraction = 1f;
 
         public IList<TParticle> Particles { get; set; }
@@ -45,7 +45,6 @@ namespace Mads
                 Particles[i].PreviousPosition = particle.Position;
                 Particles[i].Position = nextPosition;
             }
-            Debug.Log(Particles[104].Position);
         }
 
         public void StepBackward()

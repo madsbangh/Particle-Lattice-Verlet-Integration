@@ -52,6 +52,7 @@ namespace Mads
             }
         }
 
+        [EasyButtons.Button(EasyButtons.ButtonMode.EnabledInPlayMode)]
         public List<Transform> SpawnLattice()
         {
             var particles = new List<Transform>(xSize * ySize * zSize);
