@@ -42,9 +42,7 @@ namespace EasyButtons
             }
 
             // Draw the rest of the inspector as usual
-            //DrawDefaultInspector();
-
-
+            DrawDefaultInspector();
         }
     }
 }
