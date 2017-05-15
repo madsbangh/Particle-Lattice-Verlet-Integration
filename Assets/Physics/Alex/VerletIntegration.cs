@@ -14,9 +14,14 @@ namespace Alex
 		Vector3[] x; // Current particle positions
 		Vector3[] x_old; // Old particle positions
 		Vector3[] a; // Force Accumulators 
+		float deltaTime_old; 
 
 
-		public float restLength = 100f; 
+		[SerializeField]
+		[Range(0f,1f)]
+		private float softness = 0.5f; 
+
+		public float restLength = 10f; 
 
 		public int nrTimeSteps = 20; 
 		private int curTimeStep = 0; 
@@ -37,24 +42,28 @@ namespace Alex
 				x_old [i] = x[i] - start_old_x; 
 				//objs [i].transform.position = x [i]; 
 			}
-			
+
+			deltaTime_old = Time.fixedDeltaTime; 
 		}
 		
 		// Update is called once per frame
-		void FixedUpdate () 
+		void Update () 
 		{
-			//if (curTimeStep < nrTimeSteps)
-			{
-				TimeStep (); 
-				curTimeStep++; 
-			}
+			TimeStep (); 
+				//curTimeStep++; 
 		}
 
 		private void TimeStep()
 		{
 			AccumulateForces (); 
 			Verlet ();
-			CalcConstraints (); 
+			//TimeCorrVerlet();
+			CalcConstraints ();
+
+			for (int i = 0; i < objs.Length; i++) 
+			{
+				objs [i].transform.position = x [i]; 
+			}
 		}
 
 		private void Verlet()
@@ -62,13 +71,24 @@ namespace Alex
 			for (int i = 0; i < x.Length; i++) 
 			{
 				Vector3 temp = x [i]; 
-				Vector3 _newPos = (x [i] -  x_old[i]) + a[i] * Time.fixedDeltaTime * Time.fixedDeltaTime;
+				Vector3 _newPos = (x [i] -  x_old[i]) + a[i] * Time.deltaTime * Time.deltaTime;
 				//x [i] += x [i] -  Vector3.Scale(x_old[i], a[i]) * Time.fixedDeltaTime * Time.fixedDeltaTime; 
 				x_old [i] = temp; 
 				x [i] += _newPos; 
-				objs [i].transform.position = x [i]; 
 				//GameObject.CreatePrimitive (PrimitiveType.Sphere).transform.position = x[i]; 
 			}
+		}
+
+		private void TimeCorrVerlet()
+		{
+			for (int i = 0; i < x.Length; i++) 
+			{
+				Vector3 temp = x [i]; 
+				Vector3 _newPos = (x [i] -  x_old[i]) * (Time.fixedDeltaTime/deltaTime_old) + a[i] * Time.fixedDeltaTime * Time.fixedDeltaTime;
+				x_old [i] = temp; 
+				x [i] += _newPos; 
+			}
+			deltaTime_old = Time.fixedDeltaTime; 
 		}
 
 		private void AccumulateForces()
@@ -77,25 +97,26 @@ namespace Alex
 			{
 				a [i] = Physics.gravity; 
 			}
-
-			Vector3 delta = x[1] - x[0]; 
-			float deltaLength = Mathf.Sqrt(Vector3.Dot(delta,delta));
-			float diff = (deltaLength-restLength)/deltaLength; 
-			x[0] -= delta * 0.5f * diff; 
-			x[1] += delta * 0.5f * diff; 
 		}
 
 		private void CalcConstraints()
 		{
-			for (int i = 0; i < x.Length; i++) 
+			for (int j = 0; j < 10; j++) 
 			{
-				x [i] = Vector3.Min (Vector3.Max (x[i], Vector3.zero), new Vector3 (1000, 1000, 1000)); 
+				
+				for (int i = 0; i < x.Length; i++) 
+				{
+					x [i] = Vector3.Min (Vector3.Max (x[i], Vector3.zero), new Vector3 (1000, 1000, 1000)); 
+				}
+					
+				Vector3 delta = x[1] - x[0]; 
+				//float deltaLength = Mathf.Sqrt(Vector3.Dot(delta,delta));
+				//float diff = (deltaLength-restLength)/deltaLength; 
+				delta *= restLength*restLength/(Vector3.Dot(delta, delta)+restLength*restLength)-softness; 
+				x [0] -= delta;// * 0.5f * diff; 
+				x [1] += delta;// * 0.5f * diff; 
 			}
 		}
-
-/*		private Vector3 Acceleration()
-		{
-			return Vector3.one; 
-		}*/
+			
 	}
 }
