@@ -17,7 +17,7 @@ namespace Mads
             Backward
         }
         [SerializeField]
-        private Simulate simulate;
+        private Simulate simulate = Simulate.Forward;
 
         private void Awake()
         {
@@ -50,7 +50,7 @@ namespace Mads
                     transform = t,
                     Position = t.position,
                     PreviousPosition = t.position,
-                    mass = 1f
+                    Mass = 1f
                 };
                 particles.Add(particle);
             }
