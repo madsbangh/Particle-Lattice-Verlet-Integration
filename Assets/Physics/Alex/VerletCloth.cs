@@ -6,14 +6,14 @@ namespace Alex
 {
 	public class VerletCloth : MonoBehaviour 
 	{
-		struct Constraints
+		class Constraints
 		{
 			public int index0;
 			public int index1; 
-			public float restLength; 
+			public float restLength = 2f; 
 		};
 
-		struct Point 
+		class Point 
 		{
 			public Vector3 curPos;
 			public Vector3 oldPos; 
@@ -43,7 +43,7 @@ namespace Alex
 		int accuracy = 5; 
 		int clothY = 8;
 		int clothX = 15; 
-		int spacing = 2; 
+		int spacing = 8; 
 		int tearDist = 60; 
 		float friction = 0.99f; 
 		float bounce = 0.5f; 
@@ -108,8 +108,8 @@ namespace Alex
 				{
 					m_points [k].curPos = Vector3.Min (Vector3.Max (m_points[k].curPos, Vector3.zero), new Vector3 (1000, 1000, 1000)); 
 
-				//	if (m_points [k].moveable)
-				//	{
+					//if (m_points [k].moveable)
+					//{
 						Constraints c = m_constraints [k]; 
 						//Constraints c = m_points[k].c; 
 						//float deltaLength = Mathf.Sqrt (Vector3.Dot (delta, delta)); 
@@ -121,14 +121,13 @@ namespace Alex
 						delta *= c.restLength*c.restLength/(Vector3.Dot(delta, delta)+c.restLength*c.restLength)-softness; 
 						m_points [c.index0].curPos -= delta;// * 0.5f * diff; 
 						m_points [c.index1].curPos += delta;// * 0.5f * diff; 
-				//	}
+					//}
 
 				}	
-				m_points [0].curPos = new Vector3 (0, 10, 0); 
+				m_points [0].curPos = new Vector3 (0, 30, 0); 
+				m_points [clothX].curPos = new Vector3 (30, 30, 0);
 			}
 		}
-
-
 
 		void UpdateVertices()
 		{
@@ -213,6 +212,7 @@ namespace Alex
 			}*/
 			
 			m_numconstraints = clothX * clothY * 2 - clothX - clothY; //(m_numpoints * m_numpoints) - m_numpoints; 
+			//Debug.Log(m_numconstraints);
 			m_constraints = new Constraints[m_numconstraints]; 
 
 			int i = 0; 
@@ -220,6 +220,7 @@ namespace Alex
 				for (int x = 0; x < clothX; x++) {
 					if ((x+1) < clothX)
 					{
+						m_constraints [i] = new Constraints (); 
 						m_constraints [i].index0 = x + y * clothX; 
 						m_constraints [i].index1 = x + 1 + y * clothX; 
 						float len = (m_points[x].curPos - m_points[x + 1].curPos).magnitude;
@@ -227,6 +228,7 @@ namespace Alex
 					}
 					if ((y+1) < clothY)
 					{
+						m_constraints [i] = new Constraints (); 
 						m_constraints [i].index0 = x + y * clothX; 
 						m_constraints [i].index1 = x + clothX + y * clothX; 
 						float len = (m_points[x].curPos - m_points[x + clothX].curPos).magnitude;
@@ -237,7 +239,7 @@ namespace Alex
 						return; 
 				}
 			}
-
+			Debug.Log (i); 
 			/*
 			for (int i = 0; i < m_numpoints; i++) {
 				Vector3 pos = bones [i].transform.position; 
