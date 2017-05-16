@@ -5,18 +5,13 @@ namespace Mads
 {
     public class VerletIntegrator<TParticle> : IIntegrator<TParticle> where TParticle : IParticle
     {
-        public float sigmaSquared = 1f;
-        public float mu = 1f;
-        public float decay = 0.25f;
-        public float repulsion = 10f;
-        public float attraction = 1f;
+        public float width = 9.63f;
+        public float sweetSpot = 4.06f;
+        public float decay = 0.51f;
+        public float repulsion = 5.24f;
+        public float attraction = 4.83f;
 
-        public IList<TParticle> Particles { get; set; }
-
-        public void Initialize(IList<TParticle> particles)
-        {
-            Particles = particles;
-        }
+        public List<TParticle> Particles { get; set; }
 
         public void StepForward()
         {
@@ -24,25 +19,22 @@ namespace Mads
 
             for (int i = 0; i < Particles.Count - 1; i++)
             {
-                var thisParticle = Particles[i];
                 for (int j = i + 1; j < Particles.Count; j++)
                 {
-                    var thatParticle = Particles[j];
-                    var selfToOther = thatParticle.Position - thisParticle.Position;
+                    var selfToOther = Particles[j].Position - Particles[i].Position;
 
                     // HACK: Mass is not implemented correctly yet
                     acceleration[i] += selfToOther.normalized
-                                        * Formulas.PushPullForceExp(selfToOther.magnitude,
-                                        thisParticle.Mass * thatParticle.Mass,
-                                        attraction, repulsion, decay, mu, sigmaSquared);
+                                        * Formulas.PushPullForceExpGrad(selfToOther.magnitude,
+                                        Particles[i].Mass * Particles[j].Mass,
+                                        attraction, repulsion, decay, sweetSpot, width);
                     acceleration[j] -= acceleration[i];
                 }
             }
             for (int i = 0; i < Particles.Count; i++)
             {
-                var particle = Particles[i];
-                var nextPosition = 2f * particle.Position - particle.PreviousPosition + acceleration[i] * Time.fixedDeltaTime * Time.fixedDeltaTime;
-                Particles[i].PreviousPosition = particle.Position;
+                var nextPosition = 2f * Particles[i].Position - Particles[i].PreviousPosition + acceleration[i] * Time.fixedDeltaTime * Time.fixedDeltaTime;
+                Particles[i].PreviousPosition = Particles[i].Position;
                 Particles[i].Position = nextPosition;
             }
         }

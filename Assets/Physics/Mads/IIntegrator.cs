@@ -4,8 +4,7 @@ namespace Mads
 {
     public interface IIntegrator<TParticle> where TParticle : IParticle
     {
-        IList<TParticle> Particles { get; set; }
-        void Initialize(IList<TParticle> particles);
+        List<TParticle> Particles { get; set; }
         void StepForward();
         void StepBackward();
     }
