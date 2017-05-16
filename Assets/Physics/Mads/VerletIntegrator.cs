@@ -10,6 +10,7 @@ namespace Mads
         public float decay = 0.51f;
         public float repulsion = 5.24f;
         public float attraction = 4.83f;
+        public float energyConservation;
 
         public List<TParticle> Particles { get; set; }
 
@@ -17,24 +18,22 @@ namespace Mads
         {
             var acceleration = new Vector3[Particles.Count];
 
-            for (int i = 0; i < Particles.Count - 1; i++)
+            for (int i = 0; i < Particles.Count; i++)
             {
-                for (int j = i + 1; j < Particles.Count; j++)
+                for (int j = 0; j < Particles.Count; j++)
                 {
                     var selfToOther = Particles[j].Position - Particles[i].Position;
 
                     // HACK: Mass is not implemented correctly yet
-                    var a = selfToOther.normalized
+                    acceleration[i] -= selfToOther.normalized
                         * Formulas.PushPullForceExpGrad(selfToOther.magnitude,
                         Particles[i].Mass * Particles[j].Mass,
                         attraction, repulsion, decay, sweetSpot, width);
-                    acceleration[i] -= a;
-                    acceleration[j] += a;
                 }
             }
             for (int i = 0; i < Particles.Count; i++)
             {
-                var nextPosition = 2f * Particles[i].Position - Particles[i].PreviousPosition + acceleration[i] * Time.fixedDeltaTime * Time.fixedDeltaTime;
+                var nextPosition = (1f + energyConservation) * Particles[i].Position - Particles[i].PreviousPosition * energyConservation + acceleration[i] * Time.fixedDeltaTime * Time.fixedDeltaTime;
                 Particles[i].PreviousPosition = Particles[i].Position;
                 Particles[i].Position = nextPosition;
             }
