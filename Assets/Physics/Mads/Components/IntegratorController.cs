@@ -8,7 +8,7 @@ namespace Mads
         [SerializeField]
         private LatticeSpawner spawner = null;
 
-        private IIntegrator<SimpleTransformParticle> integrator;
+        private IIntegrator<BoundTransformParticle> integrator;
 
         public enum Simulate
         {
@@ -21,7 +21,7 @@ namespace Mads
 
         private void Awake()
         {
-            integrator = new VerletIntegrator<SimpleTransformParticle>();
+            integrator = new VerletIntegrator<BoundTransformParticle>();
         }
 
         private void Start()
@@ -32,20 +32,15 @@ namespace Mads
         private void FixedUpdate()
         {
             Step();
-
-            foreach (var particle in integrator.Particles)
-            {
-                particle.transform.position = particle.Position;
-            }
         }
 
         public void Initialize()
         {
             var transforms = spawner.SpawnLattice();
-            var particles = new List<SimpleTransformParticle>(transforms.Count);
+            var particles = new List<BoundTransformParticle>(transforms.Count);
             foreach (var t in transforms)
             {
-                var particle = new SimpleTransformParticle()
+                var particle = new BoundTransformParticle()
                 {
                     transform = t,
                     Position = t.position,
@@ -54,7 +49,7 @@ namespace Mads
                 };
                 particles.Add(particle);
             }
-            integrator.Initialize(particles);
+            integrator.Particles = particles;
         }
 
         private void Step()
@@ -62,7 +57,7 @@ namespace Mads
             switch (simulate)
             {
                 case Simulate.Disabled:
-                    return;
+                    break;
                 case Simulate.Forward:
                     integrator.StepForward();
                     break;
