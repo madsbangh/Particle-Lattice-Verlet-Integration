@@ -8,7 +8,21 @@ namespace Mads
         [SerializeField]
         private LatticeSpawner spawner = null;
 
-        private IIntegrator<BoundTransformParticle> integrator;
+        [Header("Parameters")]
+        [SerializeField]
+        private float width = 9.63f;
+        [SerializeField]
+        private float sweetSpot = 4.06f;
+        [SerializeField]
+        [Range(0.01f, 1f)]
+        private float decay = 0.51f;
+        [SerializeField]
+        private float repulsion = 5.24f;
+        [SerializeField]
+        private float attraction = 4.83f;
+
+        private bool dirty = true;
+        private VerletIntegrator<BoundTransformParticle> integrator;
 
         public enum Simulate
         {
@@ -18,6 +32,13 @@ namespace Mads
         }
         [SerializeField]
         private Simulate simulate = Simulate.Forward;
+
+        private void OnValidate()
+        {
+            width = Mathf.Max(0f, width);
+            sweetSpot = Mathf.Max(0f, sweetSpot);
+            dirty = true;
+        }
 
         private void Awake()
         {
@@ -31,6 +52,15 @@ namespace Mads
 
         private void FixedUpdate()
         {
+            if (dirty)
+            {
+                integrator.width = width;
+                integrator.sweetSpot = sweetSpot;
+                integrator.decay = decay;
+                integrator.repulsion = repulsion;
+                integrator.attraction = attraction;
+                dirty = false;
+            }
             Step();
         }
 

@@ -24,11 +24,12 @@ namespace Mads
                     var selfToOther = Particles[j].Position - Particles[i].Position;
 
                     // HACK: Mass is not implemented correctly yet
-                    acceleration[i] += selfToOther.normalized
-                                        * Formulas.PushPullForceExpGrad(selfToOther.magnitude,
-                                        Particles[i].Mass * Particles[j].Mass,
-                                        attraction, repulsion, decay, sweetSpot, width);
-                    acceleration[j] -= acceleration[i];
+                    var a = selfToOther.normalized
+                        * Formulas.PushPullForceExpGrad(selfToOther.magnitude,
+                        Particles[i].Mass * Particles[j].Mass,
+                        attraction, repulsion, decay, sweetSpot, width);
+                    acceleration[i] -= a;
+                    acceleration[j] += a;
                 }
             }
             for (int i = 0; i < Particles.Count; i++)
