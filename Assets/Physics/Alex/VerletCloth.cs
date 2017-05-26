@@ -227,30 +227,52 @@ namespace Alex
 				//	y = (int)(i / 10); // Fix this so it wraps around instead. 
 			}*/
 
-			int i = 0; 
-			for (int y = 0; y < clothY; y++) {
-				for (int x = 0; x < clothX; x++) {
-					if ((x+1) < clothX)
-					{
-						m_constraints [i] = new Constraints (); 
-						m_constraints [i].index0 = x + y * clothX; 
-						m_constraints [i].index1 = x + 1 + y * clothX; 
-						float len = (m_points[x].curPos - m_points[x + 1].curPos).magnitude;
-						i++;
-					}
-					if ((y+1) < clothY)
-					{
-						m_constraints [i] = new Constraints (); 
-						m_constraints [i].index0 = x + y * clothX; 
-						m_constraints [i].index1 = x + clothX + y * clothX; 
-						float len = (m_points[x].curPos - m_points[x + clothX].curPos).magnitude;
-						i++;
-					}
+			for (int i = 0; i < m_constraints.Length; i++) 
+			{
+				int x = i % clothX; 
+				int y = (int)(i / clothX); 
 
-					if (i > m_numconstraints)
-						return; 
+				m_constraints [i] = new Constraints (); 
+				m_constraints [i].index0 = i; 
+
+				if (x == clothX && y != clothY)
+				{
+					m_constraints [i].index1 = ((y - 1) * clothX) + (x); 
+				} 
+				else if (y == 0 || y == clothX)
+				{
+					m_constraints [i].index1 = ((y + 1) * clothX) + (x); 
+				} else 
+				{
+					m_constraints [i].index1 = (y * clothX) + (x + 1); 
 				}
+
 			}
+
+//			int i = 0; 
+//			for (int y = 0; y < clothY; y++) {
+//				for (int x = 0; x < clothX; x++) {
+//					if ((x+1) < clothX)
+//					{
+//						m_constraints [i] = new Constraints (); 
+//						m_constraints [i].index0 = x + y * clothX; 
+//						m_constraints [i].index1 = x + 1 + y * clothX; 
+//						float len = (m_points[x].curPos - m_points[x + 1].curPos).magnitude;
+//						i++;
+//					}
+//					if ((y+1) < clothY)
+//					{
+//						m_constraints [i] = new Constraints (); 
+//						m_constraints [i].index0 = x + y * clothX; 
+//						m_constraints [i].index1 = x + clothX + y * clothX; 
+//						float len = (m_points[x].curPos - m_points[x + clothX].curPos).magnitude;
+//						i++;
+//					}
+//
+//					if (i > m_numconstraints)
+//						return; 
+//				}
+//			}
 			//Debug.Log (i); 
 			/*
 			for (int i = 0; i < m_numpoints; i++) {
