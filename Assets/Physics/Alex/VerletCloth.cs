@@ -215,6 +215,18 @@ namespace Alex
 			//Debug.Log(m_numconstraints);
 			m_constraints = new Constraints[m_numconstraints]; 
 
+
+			//TODO: Continue working from here!!!
+/*			for (int k = 0; k < m_numpoints; k++) 
+			{
+				int x = k % clothX; // 10 is the width
+				int y = (int)(k / clothX); 
+
+				//int y; 
+				//if (i < m_numpoints)
+				//	y = (int)(i / 10); // Fix this so it wraps around instead. 
+			}*/
+
 			int i = 0; 
 			for (int y = 0; y < clothY; y++) {
 				for (int x = 0; x < clothX; x++) {
@@ -239,7 +251,7 @@ namespace Alex
 						return; 
 				}
 			}
-			Debug.Log (i); 
+			//Debug.Log (i); 
 			/*
 			for (int i = 0; i < m_numpoints; i++) {
 				Vector3 pos = bones [i].transform.position; 
