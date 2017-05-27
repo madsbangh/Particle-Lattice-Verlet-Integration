@@ -12,16 +12,41 @@ public class VerletCloth2 : MonoBehaviour
 
 	class Point 
 	{
+		public int id; 
 		public Vector3 curPos = Vector3.zero; 
 		public Vector3 prevPos = Vector3.zero; 
-		public Constraints con; 
+		public int[] c; 
+		public bool move = true; 
+		//public Constraints con = new Constraints(); 
+
+		public Point()
+		{
+			curPos = Vector3.zero;
+			prevPos = Vector3.zero; 
+			c = new int[2]; 
+		}
+
+		public override string ToString ()
+		{
+			return string.Format ("[Point] {0} at {2} has {1} constraints", id ,curPos, c.Length);
+		}
 		//public bool moveable; 
 	}
+
+	public enum Simulate
+	{
+		ENABLE,
+		DISABLE	
+	};
+
+
+	[Header("Simulation")]
+	public Simulate simulate = Simulate.ENABLE; 
 
 	[Header("Cloth Variables")]
 	[SerializeField]
 	private Vector2 clothSize;
-	private float restLength = 2f; 
+	private float restLength = 0.5f; 
 
 	[Header("Particles")]
 	private Point[] m_points; 
@@ -59,9 +84,15 @@ public class VerletCloth2 : MonoBehaviour
 			for (int x = 0; x <= clothSize.x; x++, i++) 
 			{
 				m_points [i] = new Point (); 
+				m_points [i].id = i; 
+
+				//Debug.Log ("Created: " + m_points [i].ToString ()); 
 				vertices [i] = m_points[i].curPos = m_points[i].prevPos =  new Vector3 (x, y); 
 			}	
 		}
+
+		//Debug.Log ("Points created: " + m_points.Length); 
+
 
 		mesh.vertices = vertices; 
 
@@ -74,22 +105,40 @@ public class VerletCloth2 : MonoBehaviour
 
 		for (int ti = 0, vi = 0, y = 0; y < ySize; y++, vi++) {
 			for (int x = 0; x < xSize; x++, ti += 6, vi++) {
-				int i = GetI (x, y);
-				Constraints c  = new Constraints (); 
-				c.triangles = new int[6];
-				c.triangles [0] = vi; 
-				c.triangles [3] = c.triangles [2] = vi + 1; 
-				c.triangles [4] = c.triangles [1] = vi + xSize + 1; 
-				c.triangles [5] = vi + xSize + 2; 
+				//int i = GetI (x, y);
+//				Constraints c  = new Constraints (); 
+//				c.triangles = new int[6];
+//				c.triangles [0] = vi; 
+//				c.triangles [3] = c.triangles [2] = vi + 1; 
+//				c.triangles [4] = c.triangles [1] = vi + xSize + 1; 
+//				c.triangles [5] = vi + xSize + 2; 
 
  				triangles [ti] = vi; 
 				triangles [ti + 3] = triangles [ti + 2] = vi + 1; 
 				triangles [ti + 4] = triangles [ti + 1] = vi + xSize + 1; 
 				triangles [ti + 5] = vi + xSize + 2; 	
 
-				m_points [i].con = c; 
 			}
 		}
+
+	//	Debug.Log (m_points [0].ToString ()); 
+		for (int i = 0; i < m_points.Length; i++) 
+		{
+			if (m_points [i] == null)
+				return; 
+			//m_points [i].c = new int[2]; 
+			m_points[i].c [0] = i; 
+			m_points[i].c [1] = i + (int)clothSize.x; 
+
+			//Constraints c = new Constraints (); 
+//			c.triangles = new int[2]; 
+//			c.triangles [0] = i; 
+//			c.triangles [1] = i + (int)clothSize.x;
+//			//m_points [i].con = new Constraints (); 
+// 			m_points [i].con = c; 
+		}
+
+
 
 		//m_constraints = new Constraints ();
 		//m_constraints.triangles = triangles; 
@@ -120,7 +169,8 @@ public class VerletCloth2 : MonoBehaviour
 
 	void Update()
 	{
-		TimeStep (); 
+		if (simulate == Simulate.ENABLE)
+			TimeStep (); 
 	}
 
 
@@ -147,7 +197,7 @@ public class VerletCloth2 : MonoBehaviour
 
 	private void SatisfyConstraints()
 	{
-		int numIterations = 1; 
+		int numIterations = 3; 
 		//int xSize = (int)clothSize.x; 
 		//int ySize = (int)clothSize.y; 
 
@@ -155,14 +205,21 @@ public class VerletCloth2 : MonoBehaviour
 		{
 			for (int i = 0; i < m_points.Length; i++)
 			{
-				Constraints c = m_points[i].con; 
+				//Constraints c = m_points[i].con; 
+				if (m_points [i] == null)
+					return; 
 
-				m_points [i].curPos = Vector3.Min (Vector3.Max (m_points[k].curPos, Vector3.zero), new Vector3 (1000, 1000, 1000)); 
-				
-				Vector3 delta = m_points[c.triangles[3]].curPos - m_points[c.triangles[0]].curPos; 
-				delta *= c.restLength*c.restLength/ (Vector3.Dot(delta,delta)+c.restLength*c.restLength) - 0.5f; 
-				m_points [c.triangles [0]].curPos -= delta;
-				m_points [c.triangles [3]].curPos += delta;
+				Point p = m_points [i]; 
+
+				m_points [i].curPos = Vector3.Min (Vector3.Max (m_points[k].curPos, Vector3.zero), new Vector3 (20, 20, 20)); 
+
+				if (p.c [1] > (clothSize.x * clothSize.y))
+					return; 
+
+				Vector3 delta = m_points[p.c[1]].curPos - m_points[p.c[0]].curPos; 
+				delta *= restLength*restLength/ (Vector3.Dot(delta,delta)+restLength*restLength) - 0.1f; 
+				m_points [p.c [0]].curPos -= delta;
+				m_points [p.c [1]].curPos += delta;
 
 //				m_constraints.triangles [ti] = vi; 
 //				m_constraints. [ti + 3] = m_constraints.triangles [ti + 2] = vi + 1; 
@@ -187,11 +244,16 @@ public class VerletCloth2 : MonoBehaviour
 		}
 
 		m_points [0].curPos = Vector3.zero; 
+		m_points [(int)clothSize.x - 1].curPos = new Vector3(clothSize.x, 0, 0); 
+
 	}
 
 	private void UpdateVertices()
 	{
 		for (int i = 0; i < vertices.Length; i++) {
+			if (m_points [i] == null)
+				return; 
+			
 			vertices [i] = m_points [i].curPos; 
 		}
 	}
