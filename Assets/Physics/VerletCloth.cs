@@ -14,6 +14,7 @@ public class VerletCloth : MonoBehaviour
     public Simulate simulate = Simulate.ENABLE;
 	public bool showBuildProc = false; 
 	public Vector3 wind; 
+	public bool applyGravity = true; 
 
     [Header("Cloth Variables")]
     [SerializeField]
@@ -157,17 +158,37 @@ public class VerletCloth : MonoBehaviour
         ClothVerlet();
         SatisfyConstraints();
         UpdateVertices();
+		Interact (); 
     }
 
     private void ClothVerlet()
     {
+		float tDelta = Time.deltaTime * Time.deltaTime; 
+
         for (int i = 0; i < m_x.Count; i++)
         {
-			Vector3 _newPos = (m_x[i] - m_oldx[i]) + a() * Time.deltaTime * Time.deltaTime;
+			Vector3 _newPos = (m_x[i] - m_oldx[i]) + a() * tDelta;
             m_oldx[i] = m_x[i];
             m_x[i] += _newPos;
         }
     }
+
+	private void Interact()
+	{
+		if (Input.GetMouseButton(0))
+		{
+			Vector3 mPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+			Vector3 fwd = Vector3.forward;
+
+			RaycastHit hit; 
+
+			if (Physics.Raycast(mPos, fwd, out hit))
+			{
+				Debug.Log ("I hit " + hit.transform.name); 
+			}
+
+		}
+	}
 
     private void SatisfyConstraints()
     {
@@ -240,7 +261,8 @@ public class VerletCloth : MonoBehaviour
 		if (wind.magnitude > 0)
 			tmp += wind;
 
-		tmp += Physics.gravity; 
+		if(applyGravity)
+			tmp += Physics.gravity; 
 
 		return tmp;
 	}
