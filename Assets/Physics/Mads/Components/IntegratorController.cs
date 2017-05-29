@@ -108,16 +108,13 @@ namespace Mads
 
         private void Step()
         {
-            switch (simulate)
+            if (Input.GetKey(KeyCode.RightArrow))
             {
-                case Simulate.Disabled:
-                    break;
-                case Simulate.Forward:
-                    integrator.StepForward();
-                    break;
-                case Simulate.Backward:
-                    integrator.StepBackward();
-                    break;
+                integrator.StepForward();
+            }
+            else if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                integrator.StepBackward();
             }
         }
     }
