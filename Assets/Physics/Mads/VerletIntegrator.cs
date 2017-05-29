@@ -42,7 +42,27 @@ namespace Mads
 
         public void StepBackward()
         {
-            throw new System.NotImplementedException();
+            var acceleration = new Vector3[Particles.Count];
+
+            for (int i = 0; i < Particles.Count; i++)
+            {
+                for (int j = 0; j < Particles.Count; j++)
+                {
+                    var selfToOther = Particles[j].PreviousPosition - Particles[i].PreviousPosition;
+
+                    // HACK: Mass is not implemented correctly yet
+                    acceleration[i] -= selfToOther.normalized
+                        * Formulas.PushPullForceExpGrad(selfToOther.magnitude,
+                        Particles[i].Mass * Particles[j].Mass,
+                        attraction, repulsion, decay, sweetSpot, width);
+                }
+            }
+            for (int i = 0; i < Particles.Count; i++)
+            {
+                var nextPosition = (1f + energyConservation) * Particles[i].PreviousPosition - Particles[i].Position * energyConservation + acceleration[i] * timestep * timestep;
+                Particles[i].Position = Particles[i].PreviousPosition;
+                Particles[i].PreviousPosition = nextPosition;
+            }
         }
     }
 }

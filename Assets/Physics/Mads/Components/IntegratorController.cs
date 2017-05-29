@@ -7,6 +7,12 @@ namespace Mads
     {
         [SerializeField]
         private LatticeSpawner spawner = null;
+        [SerializeField]
+        private Transform projectileSpawn = null;
+        [SerializeField]
+        private Vector3 projectoleVelocity = Vector3.zero;
+        [SerializeField]
+        private GameObject projectilePrefab = null;
 
         [Header("Parameters")]
         [SerializeField]
@@ -27,7 +33,7 @@ namespace Mads
         private float timestep = 0.01f;
 
         private bool dirty = true;
-        private VerletIntegrator<BoundTransformParticle> integrator;
+        private VerletIntegrator<LinkedTransformParticle> integrator;
 
         public enum Simulate
         {
@@ -47,7 +53,7 @@ namespace Mads
 
         private void Awake()
         {
-            integrator = new VerletIntegrator<BoundTransformParticle>();
+            integrator = new VerletIntegrator<LinkedTransformParticle>();
         }
 
         private void Start()
@@ -74,10 +80,10 @@ namespace Mads
         public void Initialize()
         {
             var transforms = spawner.SpawnLattice();
-            var particles = new List<BoundTransformParticle>(transforms.Count);
+            var particles = new List<LinkedTransformParticle>(transforms.Count);
             foreach (var t in transforms)
             {
-                var particle = new BoundTransformParticle()
+                var particle = new LinkedTransformParticle()
                 {
                     transform = t,
                     Position = t.position,
@@ -86,6 +92,17 @@ namespace Mads
                 };
                 particles.Add(particle);
             }
+
+            var projectile = Instantiate(projectilePrefab, projectileSpawn.position, Quaternion.identity).transform;
+            var projectileParticle = new LinkedTransformParticle()
+            {
+                transform = projectile,
+                Position = projectile.position,
+                PreviousPosition = projectile.position - projectoleVelocity * timestep,
+                Mass = 5f
+            };
+            particles.Add(projectileParticle);
+
             integrator.Particles = particles;
         }
 
