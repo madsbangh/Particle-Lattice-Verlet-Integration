@@ -11,6 +11,7 @@ namespace Mads
         public float repulsion = 5.24f;
         public float attraction = 4.83f;
         public float energyConservation;
+        public float timestep = 0.01f;
 
         public List<TParticle> Particles { get; set; }
 
@@ -33,7 +34,7 @@ namespace Mads
             }
             for (int i = 0; i < Particles.Count; i++)
             {
-                var nextPosition = (1f + energyConservation) * Particles[i].Position - Particles[i].PreviousPosition * energyConservation + acceleration[i] * Time.fixedDeltaTime * Time.fixedDeltaTime;
+                var nextPosition = (1f + energyConservation) * Particles[i].Position - Particles[i].PreviousPosition * energyConservation + acceleration[i] * timestep * timestep;
                 Particles[i].PreviousPosition = Particles[i].Position;
                 Particles[i].Position = nextPosition;
             }

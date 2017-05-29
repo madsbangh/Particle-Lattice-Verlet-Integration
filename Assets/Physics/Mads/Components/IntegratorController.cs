@@ -23,6 +23,8 @@ namespace Mads
         [SerializeField]
         [Range(0f, 1f)]
         private float energyConservation = 1f;
+        [SerializeField]
+        private float timestep = 0.01f;
 
         private bool dirty = true;
         private VerletIntegrator<BoundTransformParticle> integrator;
@@ -63,6 +65,7 @@ namespace Mads
                 integrator.repulsion = repulsion;
                 integrator.attraction = attraction;
                 integrator.energyConservation = energyConservation;
+                integrator.timestep = timestep;
                 dirty = false;
             }
             Step();
