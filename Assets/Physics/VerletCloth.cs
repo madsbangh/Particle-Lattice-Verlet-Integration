@@ -20,7 +20,7 @@ public class VerletCloth : MonoBehaviour
     [SerializeField]
     private Vector2 clothSize;
     [SerializeField]
-    private float restLength = 0.5f;
+    private float restLength = 1f;
 
     [Header("Grid Mesh")]
     private Mesh mesh;
@@ -38,6 +38,7 @@ public class VerletCloth : MonoBehaviour
 
     private GameObject[] square;
     private Dictionary<GameObject, int> vertexToken;
+    private Dictionary<int, bool> lockedVertices;
     public Material tmpMat;
     private List<Vector3> m_x;
     private List<Vector3> m_oldx;
@@ -59,6 +60,7 @@ public class VerletCloth : MonoBehaviour
         m_x = new List<Vector3>();
         m_oldx = new List<Vector3>();
         vertexToken = new Dictionary<GameObject, int>();
+        lockedVertices = new Dictionary<int, bool>();
 
         //vertices = new List<int> (); 
 
@@ -79,6 +81,7 @@ public class VerletCloth : MonoBehaviour
             m_x.Add(newPos);
             m_oldx.Add(newPos);
             vertexToken.Add(square[y], y);
+            lockedVertices.Add(y, false); 
         }
 
         for (int i = 0; i < square.Length - 1; i++)
@@ -128,25 +131,6 @@ public class VerletCloth : MonoBehaviour
                 yield return new WaitForSeconds(0.1f);
         }
 
-        //		triangles = new int[square.Length * 6]; 
-        //			
-        //
-        //		for (int ti = 0, vi = 0, y = 0; y < 4; y++, vi++) {
-        //			for (int x = 0; x < gridLength; x++, ti += 6, vi++) {
-        //				triangles [ti] = vi; 
-        //				triangles [ti + 3] = triangles [ti + 2] = vi + 1; 
-        //				triangles [ti + 4] = triangles [ti + 1] = vi + gridLength + 1; 
-        //				triangles [ti + 5] = vi + gridLength + 2; 	
-        //			}
-        //		}
-        //
-        //		mf = GetComponent<MeshFilter> ();
-        //		mr = GetComponent<MeshRenderer> ();
-        //		mf.mesh = mesh = new Mesh ();
-        //		mesh.name = "Procedural Grid"; 
-        //
-        //		mesh.triangles = triangles; 
-
         simulate = Simulate.ENABLE;
 
         yield return null;
@@ -181,40 +165,55 @@ public class VerletCloth : MonoBehaviour
 
     private bool dragVertex = false;
     int vertexToDrag = 0;
+    int vertexToLock = 0;
 
     private void Interact()
     {
-        if (Input.GetMouseButton(0))
-        {
-            Vector3 mPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector3 fwd = Vector3.forward;
+        Vector3 mPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 fwd = Vector3.forward;
 
+        if (Input.GetMouseButtonDown(1))
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(mPos, fwd, out hit))
+            {
+                vertexToLock = vertexToken[hit.transform.gameObject];
+                lockedVertices[vertexToLock] = !lockedVertices[vertexToLock];
+
+                if (lockedVertices[vertexToLock])
+                {
+                    square[vertexToLock].GetComponent<Renderer>().material.color = Color.red;
+                } 
+                else
+                {
+                    square[vertexToLock].GetComponent<Renderer>().material.color = Color.white;
+                }
+            }
+        }
+        else if (Input.GetMouseButton(0))
+        {
             if (!dragVertex)
             {
-
                 RaycastHit hit;
                 if (Physics.Raycast(mPos, fwd, out hit))
                 {
-                    //Debug.Log ("I hit " + hit.transform.name);
-                    //Debug.Log(vertexToken[hit.transform.gameObject]);
                     vertexToDrag = vertexToken[hit.transform.gameObject];
                     dragVertex = true;
                 }
             }
             else
             {
-                m_x[vertexToDrag] = new Vector3(mPos.x, mPos.y, 0);
-
+                m_x[vertexToDrag] = square[vertexToDrag].transform.position = new Vector3(mPos.x, mPos.y, 0);
             }
 
-
-
         }
-        else if (Input.GetMouseButtonUp(0))
+         
+        
+        if (Input.GetMouseButtonUp(0))
         {
             dragVertex = false;
-            // vertexToDrag = 0; 
         }
+
     }
 
     private void SatisfyConstraints()
@@ -233,11 +232,14 @@ public class VerletCloth : MonoBehaviour
                 m_x[c.particleB] += delta;
             }
         }
-        //m_x[0] = Vector3.zero;
 
-       // int y = (int)(clothSize.x) - 1;
-       // int gridLength = (int)(clothSize.x);
-       // m_x[y] = new Vector3((int)(y % (gridLength)), (int)(y / gridLength), 0);
+        for (int i = 0; i < lockedVertices.Count; i++)
+        {
+            if (lockedVertices[i])
+            {
+                m_x[i] = square[i].transform.position; 
+            }
+        }
     }
 
     private void UpdateVertices()
@@ -303,6 +305,49 @@ public class VerletCloth : MonoBehaviour
         return result;
     }
 
+    public void UpdateCloth()
+    {
+
+    }
+
+
+    // Button Functions
+    public void SetGravity(bool isActive)
+    {
+        applyGravity = isActive;
+    }
+
+    public void SetRestLength(float newLength)
+    {
+        restLength = newLength;
+    }
+
+    public void SetSizeX(int value)
+    {
+        wind.x = value;
+    }
+
+    public void SetSizeY(int value)
+    {
+        wind.z = value;
+    }
+
+    public void ResetSimulation()
+    {
+        Debug.Log("Reset button");
+        mCon.Clear();
+        m_x.Clear();
+        m_oldx.Clear();
+        vertexToken.Clear();
+        lockedVertices.Clear();
+
+        foreach (Transform child in transform)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+
+        StartCoroutine(GenerateGrid()); 
+    }
 
     private int GetY(int i)
     {
