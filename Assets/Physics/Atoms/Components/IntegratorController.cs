@@ -18,20 +18,20 @@ namespace Atoms
 
         [Header("Parameters")]
         [SerializeField]
-        private int iterations = 1;
+        private int iterations = 5;
         [SerializeField]
-        private float width = 1f;
+        private float width = 0.1f;
         [SerializeField]
         private float gaussianCenter = 1f;
         [SerializeField]
         [Range(0.01f, 1f)]
-        private float decay = 0.5f;
+        private float decay = 0.23f;
         [SerializeField]
-        private float expContribution = 1f;
+        private float expContribution = -5f;
         [SerializeField]
-        private float gaussianContribution = 1f;
+        private float gaussianContribution = 3.6f;
         [SerializeField]
-        private float timestep = 0.01f;
+        private float timestep = 0.0025f;
 
         private bool dirty = true;
         private VerletIntegrator integrator;
