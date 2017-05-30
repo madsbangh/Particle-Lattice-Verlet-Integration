@@ -13,21 +13,23 @@ namespace Mads
         private Vector3 projectoleVelocity = Vector3.zero;
         [SerializeField]
         private GameObject projectilePrefab = null;
+        [SerializeField]
+        private float projectileMass = 1f;
 
         [Header("Parameters")]
         [SerializeField]
         private int iterations = 1;
         [SerializeField]
-        private float width = 9.63f;
+        private float width = 1f;
         [SerializeField]
-        private float sweetSpot = 4.06f;
+        private float gaussianCenter = 1f;
         [SerializeField]
         [Range(0.01f, 1f)]
-        private float decay = 0.51f;
+        private float decay = 0.5f;
         [SerializeField]
-        private float repulsion = 5.24f;
+        private float expContribution = 1f;
         [SerializeField]
-        private float attraction = 4.83f;
+        private float gaussianContribution = 1f;
         [SerializeField]
         private float timestep = 0.01f;
 
@@ -37,7 +39,7 @@ namespace Mads
         private void OnValidate()
         {
             width = Mathf.Max(0f, width);
-            sweetSpot = Mathf.Max(0f, sweetSpot);
+            gaussianCenter = Mathf.Max(0f, gaussianCenter);
             iterations = Mathf.Clamp(iterations, 1, 24);
             dirty = true;
         }
@@ -61,10 +63,10 @@ namespace Mads
             {
                 // Update integrator parameters
                 integrator.width = width;
-                integrator.sweetSpot = sweetSpot;
+                integrator.gaussianCenter = gaussianCenter;
                 integrator.decay = decay;
-                integrator.repulsion = repulsion;
-                integrator.attraction = attraction;
+                integrator.expContribution = expContribution;
+                integrator.gaussianContribution = gaussianContribution;
                 integrator.timestep = timestep;
                 dirty = false;
             }

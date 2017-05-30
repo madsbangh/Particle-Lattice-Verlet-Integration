@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mads
@@ -7,10 +8,10 @@ namespace Mads
     {
         // Parameters
         public float width;
-        public float sweetSpot;
+        public float gaussianCenter;
         public float decay;
-        public float repulsion;
-        public float attraction;
+        public float expContribution;
+        public float gaussianContribution;
         public float timestep;
 
         // Particle states
@@ -23,31 +24,8 @@ namespace Mads
 
         public void StepForward()
         {
-            // Allocate if needed
-            while (accelerations.Count < Positions.Count)
-            {
-                accelerations.Add(Vector3.zero);
-            }
+            AccumulateAcceleration(Positions);
 
-            // Reset acceleration
-            for (int i = 0; i < accelerations.Count; i++)
-            {
-                accelerations[i] = Vector3.zero;
-            }
-
-            // Accumulate acceleration
-            for (int i = 0; i < Positions.Count; i++)
-            {
-                for (int j = 0; j < Positions.Count; j++)
-                {
-                    var selfToOther = Positions[j] - Positions[i];
-
-                    accelerations[i] -= selfToOther.normalized
-                        * Formulas.PushPullExpDerivative(selfToOther.magnitude,
-                        Masses[i] * Masses[j],
-                        attraction, repulsion, decay, sweetSpot, width);
-                }
-            }
             for (int i = 0; i < Positions.Count; i++)
             {
                 var nextPosition = 2f * Positions[i] - PreviousPositions[i] + accelerations[i] * timestep * timestep;
@@ -59,7 +37,44 @@ namespace Mads
 
         public void StepBackward()
         {
+            AccumulateAcceleration(PreviousPositions);
 
+            for (int i = 0; i < Positions.Count; i++)
+            {
+                var nextPosition = 2f * PreviousPositions[i] - Positions[i] + accelerations[i] * timestep * timestep;
+                Positions[i] = PreviousPositions[i];
+                PreviousPositions[i] = nextPosition;
+                Transforms[i].position = nextPosition;
+            }
+        }
+
+        private void AccumulateAcceleration(List<Vector3> positions)
+        {
+            // Allocate if needed
+            while (accelerations.Count < positions.Count)
+            {
+                accelerations.Add(Vector3.zero);
+            }
+
+            // Reset acceleration
+            for (int i = 0; i < accelerations.Count; i++)
+            {
+                accelerations[i] = Vector3.zero;
+            }
+
+            // Accumulate acceleration
+            for (int i = 0; i < positions.Count; i++)
+            {
+                for (int j = 0; j < positions.Count; j++)
+                {
+                    var selfToOther = positions[j] - positions[i];
+
+                    accelerations[i] -= selfToOther.normalized
+                        * Formulas.PushPullExpDerivative(selfToOther.magnitude,
+                        Masses[i] * Masses[j],
+                        gaussianContribution, expContribution, decay, gaussianCenter, width);
+                }
+            }
         }
     }
 }

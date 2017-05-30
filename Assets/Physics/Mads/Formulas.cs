@@ -81,13 +81,13 @@ namespace Mads
         /// </summary>
         /// <param name="x">The distance from the other particle.</param>
         /// <param name="mass">The product of the masses of the two particles</param>
-        /// <param name="attraction">Attraction strength multiplier.</param>
-        /// <param name="repulsion">Repulsion strength multiplier</param>
-        /// <param name="sweetSpot">The center of the attractive gaussion bell curve.</param>
-        /// <param name="std">The width of the attractive gaussian bell curve.</param>
-        public static float PushPullHyperbolic(float x, float mass, float attraction, float repulsion, float sweetSpot, float std)
+        /// <param name="gaussianContribution">Attraction strength multiplier.</param>
+        /// <param name="hyperboleContribution">Repulsion strength multiplier</param>
+        /// <param name="gaussianCenter">The center of the attractive gaussion bell curve.</param>
+        /// <param name="width">The width of the attractive gaussian bell curve.</param>
+        public static float PushPullHyperbolic(float x, float mass, float gaussianContribution, float hyperboleContribution, float gaussianCenter, float width)
         {
-            return (repulsion / Mathf.Max(Mathf.Epsilon, x) - attraction * Mathf.Exp(-((x - sweetSpot) * (x - sweetSpot)) / std)) * mass;
+            return (hyperboleContribution / Mathf.Max(Mathf.Epsilon, x) - gaussianContribution * Mathf.Exp(-((x - gaussianCenter) * (x - gaussianCenter)) / width)) * mass;
         }
     }
 }
