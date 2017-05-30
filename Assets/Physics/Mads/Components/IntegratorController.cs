@@ -92,7 +92,7 @@ namespace Mads
             transforms.Add(projectile);
             positions.Add(projectile.position);
             previousPositions.Add(projectile.position - projectoleVelocity * timestep);
-            masses.Add(5f);
+            masses.Add(projectileMass);
 
             // Set integrator state
             integrator.Transforms = transforms;
