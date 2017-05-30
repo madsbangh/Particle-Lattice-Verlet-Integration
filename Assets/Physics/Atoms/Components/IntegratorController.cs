@@ -98,7 +98,7 @@ namespace Atoms
             integrator.Transforms = transforms;
             integrator.Positions = positions;
             integrator.PreviousPositions = previousPositions;
-            integrator.Masses = masses;
+            integrator.Influences = masses;
         }
 
     private void Step()

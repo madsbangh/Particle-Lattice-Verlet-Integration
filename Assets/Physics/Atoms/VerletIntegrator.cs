@@ -18,7 +18,7 @@ namespace Atoms
         public List<Transform> Transforms { get; set; }
         public List<Vector3> Positions { get; set; }
         public List<Vector3> PreviousPositions { get; set; }
-        public List<float> Masses { get; set; }
+        public List<float> Influences { get; set; }
 
         private List<Vector3> accelerations = new List<Vector3>();
 
@@ -71,7 +71,7 @@ namespace Atoms
 
                     accelerations[i] -= selfToOther.normalized
                         * Formulas.PushPullExpDerivative(selfToOther.magnitude,
-                        Masses[i] * Masses[j],
+                        Influences[i] * Influences[j],
                         gaussianContribution, expContribution, decay, gaussianCenter, width);
                 }
             }

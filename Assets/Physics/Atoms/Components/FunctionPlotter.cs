@@ -31,7 +31,7 @@ public class FunctionPlotter : MonoBehaviour
     [Space]
     [Header("Formula Params")]
     [SerializeField]
-    private float mass = 0f;
+    private float influence = 0f;
     [SerializeField]
     private float width = 0f;
     [SerializeField]
@@ -62,13 +62,13 @@ public class FunctionPlotter : MonoBehaviour
                 switch (function)
                 {
                     case Function.PPExp:
-                        val = Atoms.Formulas.PushPullExp(x, mass, attraction, repulsion, decay, sweetSpot, width);
+                        val = Atoms.Formulas.PushPullExp(x, influence, attraction, repulsion, decay, sweetSpot, width);
                         break;
                     case Function.PPExpDerivative:
-                        val = Atoms.Formulas.PushPullExpDerivative(x, mass, attraction, repulsion, decay, sweetSpot, width);
+                        val = Atoms.Formulas.PushPullExpDerivative(x, influence, attraction, repulsion, decay, sweetSpot, width);
                         break;
                     case Function.PPRecip:
-                        val = Atoms.Formulas.PushPullHyperbolic(x, mass, attraction, repulsion, sweetSpot, width);
+                        val = Atoms.Formulas.PushPullHyperbolic(x, influence, attraction, repulsion, sweetSpot, width);
                         break;
                     case Function.Gaussian:
                         val = Atoms.Formulas.Gaussian(x, sweetSpot, width) * attraction;

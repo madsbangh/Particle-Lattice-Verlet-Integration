@@ -11,16 +11,16 @@ namespace Atoms
         /// and an offset gaussian curve for attraction.
         /// </summary>
         /// <param name="x">The distance from the other particle.</param>
-        /// <param name="mass">The product of the masses of the two particles</param>
+        /// <param name="combinedInfluence">The product of the masses of the two particles</param>
         /// <param name="gaussianContribution">Attraction strength multiplier.</param>
         /// <param name="expContribution">Repulsion strength multiplier</param>
         /// <param name="decay">The repulsive exponential decay factor (should be in the range [0, 1]).</param>
         /// <param name="gaussianCenter">The center of the attractive gaussion bell curve.</param>
         /// <param name="width">The width of the attractive gaussian bell curve.</param>
         /// <returns></returns>
-        public static float PushPullExp(float x, float mass, float gaussianContribution, float expContribution, float decay, float gaussianCenter, float width)
+        public static float PushPullExp(float x, float combinedInfluence, float gaussianContribution, float expContribution, float decay, float gaussianCenter, float width)
         {
-            return (expContribution * Mathf.Pow(decay, x) - gaussianContribution * Gaussian(x, gaussianCenter, width)) * mass;
+            return (expContribution * Mathf.Pow(decay, x) - gaussianContribution * Gaussian(x, gaussianCenter, width)) * combinedInfluence;
         }
 
         /// <summary>
@@ -41,15 +41,15 @@ namespace Atoms
         /// and an offset gaussian curve for attraction.
         /// </summary>
         /// <param name="x">The distance from the other particle.</param>
-        /// <param name="mass">The product of the masses of the two particles</param>
+        /// <param name="combinedInfluence">The product of the masses of the two particles</param>
         /// <param name="gaussianContribution">Attraction strength multiplier.</param>
         /// <param name="expContribution">Repulsion strength multiplier</param>
         /// <param name="decay">The repulsive exponential decay factor (should be in the range [0, 1]).</param>
         /// <param name="gaussianCenter">The center of the attractive gaussion bell curve.</param>
         /// <param name="width">The width of the attractive gaussian bell curve.</param>
-        public static float PushPullExpDerivative(float x, float mass, float gaussianContribution, float expContribution, float decay, float gaussianCenter, float width)
+        public static float PushPullExpDerivative(float x, float combinedInfluence, float gaussianContribution, float expContribution, float decay, float gaussianCenter, float width)
         {
-            return (expContribution * PowDerivative(decay, x) - gaussianContribution * GaussianDerivative(x, gaussianCenter, width)) * mass;
+            return (expContribution * PowDerivative(decay, x) - gaussianContribution * GaussianDerivative(x, gaussianCenter, width)) * combinedInfluence;
         }
 
         /// <summary>
@@ -80,14 +80,14 @@ namespace Atoms
         /// and an offset gaussian curve for attraction.
         /// </summary>
         /// <param name="x">The distance from the other particle.</param>
-        /// <param name="mass">The product of the masses of the two particles</param>
+        /// <param name="combinedInfluence">The product of the masses of the two particles</param>
         /// <param name="gaussianContribution">Attraction strength multiplier.</param>
         /// <param name="hyperboleContribution">Repulsion strength multiplier</param>
         /// <param name="gaussianCenter">The center of the attractive gaussion bell curve.</param>
         /// <param name="width">The width of the attractive gaussian bell curve.</param>
-        public static float PushPullHyperbolic(float x, float mass, float gaussianContribution, float hyperboleContribution, float gaussianCenter, float width)
+        public static float PushPullHyperbolic(float x, float combinedInfluence, float gaussianContribution, float hyperboleContribution, float gaussianCenter, float width)
         {
-            return (hyperboleContribution / Mathf.Max(Mathf.Epsilon, x) - gaussianContribution * Mathf.Exp(-((x - gaussianCenter) * (x - gaussianCenter)) / width)) * mass;
+            return (hyperboleContribution / Mathf.Max(Mathf.Epsilon, x) - gaussianContribution * Mathf.Exp(-((x - gaussianCenter) * (x - gaussianCenter)) / width)) * combinedInfluence;
         }
     }
 }
