@@ -24,7 +24,8 @@ namespace Cloth
 		public float restLength = 10f; 
 
 		public int nrTimeSteps = 20; 
-		private int curTimeStep = 0; 
+        // NOTE: commented unused variable
+		//private int curTimeStep = 0; 
 
 		// Use this for initialization
 		void Start () 

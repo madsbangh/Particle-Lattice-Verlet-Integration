@@ -6,8 +6,9 @@ namespace Cloth.Maybe
 {
 	public class Point 
 	{
-		
-		private float x; 
+        // Tired of warnings. Just remove when the variables are not unused anymore :)
+#pragma warning disable 0414
+        private float x; 
 		private float y; 
 		private float z;
 		private float px;
@@ -24,6 +25,7 @@ namespace Cloth.Maybe
 		private float dy;
 		private float dz; 
 		private float dist; 
+#pragma warning restore 0414
 
 		public Point(float x, float y, float z)
 		{
@@ -39,5 +41,5 @@ namespace Cloth.Maybe
 
 
 		}
-	}
+    }
 }

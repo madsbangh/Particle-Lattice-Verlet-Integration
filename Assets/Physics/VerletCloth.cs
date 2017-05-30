@@ -24,14 +24,16 @@ public class VerletCloth : MonoBehaviour
 
     [Header("Grid Mesh")]
     private Mesh mesh;
-    MeshFilter mf;
-    MeshRenderer mr;
+    // NOTE: Commented unused variaables
+    //MeshFilter mf;
+    //MeshRenderer mr;
     private Vector3[] vertices;
 
     private void Awake()
     {
-        mf = GetComponent<MeshFilter>();
-        mr = GetComponent<MeshRenderer>();
+        // NOTE: Commented unused variaables
+        //mf = GetComponent<MeshFilter>();
+        //mr = GetComponent<MeshRenderer>();
 
         StartCoroutine(GenerateGrid());
     }
