@@ -12,15 +12,15 @@ namespace Mads
         /// </summary>
         /// <param name="x">The distance from the other particle.</param>
         /// <param name="mass">The product of the masses of the two particles</param>
-        /// <param name="attraction">Attraction strength multiplier.</param>
-        /// <param name="repulsion">Repulsion strength multiplier</param>
+        /// <param name="gaussianContribution">Attraction strength multiplier.</param>
+        /// <param name="expContribution">Repulsion strength multiplier</param>
         /// <param name="decay">The repulsive exponential decay factor (should be in the range [0, 1]).</param>
-        /// <param name="sweetSpot">The center of the attractive gaussion bell curve.</param>
+        /// <param name="gaussianCenter">The center of the attractive gaussion bell curve.</param>
         /// <param name="width">The width of the attractive gaussian bell curve.</param>
         /// <returns></returns>
-        public static float PushPullForceExp(float x, float mass, float attraction, float repulsion, float decay, float sweetSpot, float width)
+        public static float PushPullExp(float x, float mass, float gaussianContribution, float expContribution, float decay, float gaussianCenter, float width)
         {
-            return (repulsion * Mathf.Pow(decay, x) - attraction * Gaussian(x, sweetSpot, width)) * mass;
+            return (expContribution * Mathf.Pow(decay, x) - gaussianContribution * Gaussian(x, gaussianCenter, width)) * mass;
         }
 
         /// <summary>
@@ -42,14 +42,14 @@ namespace Mads
         /// </summary>
         /// <param name="x">The distance from the other particle.</param>
         /// <param name="mass">The product of the masses of the two particles</param>
-        /// <param name="attraction">Attraction strength multiplier.</param>
-        /// <param name="repulsion">Repulsion strength multiplier</param>
+        /// <param name="gaussianContribution">Attraction strength multiplier.</param>
+        /// <param name="expContribution">Repulsion strength multiplier</param>
         /// <param name="decay">The repulsive exponential decay factor (should be in the range [0, 1]).</param>
-        /// <param name="sweetSpot">The center of the attractive gaussion bell curve.</param>
+        /// <param name="gaussianCenter">The center of the attractive gaussion bell curve.</param>
         /// <param name="width">The width of the attractive gaussian bell curve.</param>
-        public static float PushPullForceExpGrad(float x, float mass, float attraction, float repulsion, float decay, float sweetSpot, float width)
+        public static float PushPullExpDerivative(float x, float mass, float gaussianContribution, float expContribution, float decay, float gaussianCenter, float width)
         {
-            return (repulsion * PowDerivative(decay, x) - attraction * GaussianDerivative(x, sweetSpot, width)) * mass;
+            return (expContribution * PowDerivative(decay, x) - gaussianContribution * GaussianDerivative(x, gaussianCenter, width)) * mass;
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Mads
         /// <param name="repulsion">Repulsion strength multiplier</param>
         /// <param name="sweetSpot">The center of the attractive gaussion bell curve.</param>
         /// <param name="std">The width of the attractive gaussian bell curve.</param>
-        public static float PushPullForceHyperbolic(float x, float mass, float attraction, float repulsion, float sweetSpot, float std)
+        public static float PushPullHyperbolic(float x, float mass, float attraction, float repulsion, float sweetSpot, float std)
         {
             return (repulsion / Mathf.Max(Mathf.Epsilon, x) - attraction * Mathf.Exp(-((x - sweetSpot) * (x - sweetSpot)) / std)) * mass;
         }

@@ -3,66 +3,63 @@ using UnityEngine;
 
 namespace Mads
 {
-    public class VerletIntegrator<TParticle> : IIntegrator<TParticle> where TParticle : IParticle
+    public class VerletIntegrator
     {
-        public float width = 9.63f;
-        public float sweetSpot = 4.06f;
-        public float decay = 0.51f;
-        public float repulsion = 5.24f;
-        public float attraction = 4.83f;
-        public float energyConservation;
-        public float timestep = 0.01f;
+        // Parameters
+        public float width;
+        public float sweetSpot;
+        public float decay;
+        public float repulsion;
+        public float attraction;
+        public float timestep;
 
-        public List<TParticle> Particles { get; set; }
+        // Particle states
+        public List<Transform> Transforms { get; set; }
+        public List<Vector3> Positions { get; set; }
+        public List<Vector3> PreviousPositions { get; set; }
+        public List<float> Masses { get; set; }
+
+        private List<Vector3> accelerations = new List<Vector3>();
 
         public void StepForward()
         {
-            var acceleration = new Vector3[Particles.Count];
-
-            for (int i = 0; i < Particles.Count; i++)
+            // Allocate if needed
+            while (accelerations.Count < Positions.Count)
             {
-                for (int j = 0; j < Particles.Count; j++)
-                {
-                    var selfToOther = Particles[j].Position - Particles[i].Position;
+                accelerations.Add(Vector3.zero);
+            }
 
-                    // HACK: Mass is not implemented correctly yet
-                    acceleration[i] -= selfToOther.normalized
-                        * Formulas.PushPullForceExpGrad(selfToOther.magnitude,
-                        Particles[i].Mass * Particles[j].Mass,
+            // Reset acceleration
+            for (int i = 0; i < accelerations.Count; i++)
+            {
+                accelerations[i] = Vector3.zero;
+            }
+
+            // Accumulate acceleration
+            for (int i = 0; i < Positions.Count; i++)
+            {
+                for (int j = 0; j < Positions.Count; j++)
+                {
+                    var selfToOther = Positions[j] - Positions[i];
+
+                    accelerations[i] -= selfToOther.normalized
+                        * Formulas.PushPullExpDerivative(selfToOther.magnitude,
+                        Masses[i] * Masses[j],
                         attraction, repulsion, decay, sweetSpot, width);
                 }
             }
-            for (int i = 0; i < Particles.Count; i++)
+            for (int i = 0; i < Positions.Count; i++)
             {
-                var nextPosition = (1f + energyConservation) * Particles[i].Position - Particles[i].PreviousPosition * energyConservation + acceleration[i] * timestep * timestep;
-                Particles[i].PreviousPosition = Particles[i].Position;
-                Particles[i].Position = nextPosition;
+                var nextPosition = 2f * Positions[i] - PreviousPositions[i] + accelerations[i] * timestep * timestep;
+                PreviousPositions[i] = Positions[i];
+                Positions[i] = nextPosition;
+                Transforms[i].position = nextPosition;
             }
         }
 
         public void StepBackward()
         {
-            var acceleration = new Vector3[Particles.Count];
 
-            for (int i = 0; i < Particles.Count; i++)
-            {
-                for (int j = 0; j < Particles.Count; j++)
-                {
-                    var selfToOther = Particles[j].PreviousPosition - Particles[i].PreviousPosition;
-
-                    // HACK: Mass is not implemented correctly yet
-                    acceleration[i] -= selfToOther.normalized
-                        * Formulas.PushPullForceExpGrad(selfToOther.magnitude,
-                        Particles[i].Mass * Particles[j].Mass,
-                        attraction, repulsion, decay, sweetSpot, width);
-                }
-            }
-            for (int i = 0; i < Particles.Count; i++)
-            {
-                var nextPosition = (1f + energyConservation) * Particles[i].PreviousPosition - Particles[i].Position * energyConservation + acceleration[i] * timestep * timestep;
-                Particles[i].Position = Particles[i].PreviousPosition;
-                Particles[i].PreviousPosition = nextPosition;
-            }
         }
     }
 }

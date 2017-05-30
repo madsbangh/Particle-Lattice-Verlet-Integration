@@ -62,13 +62,13 @@ public class FunctionPlotter : MonoBehaviour
                 switch (function)
                 {
                     case Function.PPExp:
-                        val = Mads.Formulas.PushPullForceExp(x, mass, attraction, repulsion, decay, sweetSpot, width);
+                        val = Mads.Formulas.PushPullExp(x, mass, attraction, repulsion, decay, sweetSpot, width);
                         break;
                     case Function.PPExpDerivative:
-                        val = Mads.Formulas.PushPullForceExpGrad(x, mass, attraction, repulsion, decay, sweetSpot, width);
+                        val = Mads.Formulas.PushPullExpDerivative(x, mass, attraction, repulsion, decay, sweetSpot, width);
                         break;
                     case Function.PPRecip:
-                        val = Mads.Formulas.PushPullForceHyperbolic(x, mass, attraction, repulsion, sweetSpot, width);
+                        val = Mads.Formulas.PushPullHyperbolic(x, mass, attraction, repulsion, sweetSpot, width);
                         break;
                     case Function.Gaussian:
                         val = Mads.Formulas.Gaussian(x, sweetSpot, width) * attraction;

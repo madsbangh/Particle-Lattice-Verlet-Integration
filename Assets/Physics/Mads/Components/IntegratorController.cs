@@ -6,7 +6,7 @@ namespace Mads
     public class IntegratorController : MonoBehaviour
     {
         [SerializeField]
-        private LatticeSpawner spawner = null;
+        private LatticeSpawner latticeSpawner = null;
         [SerializeField]
         private Transform projectileSpawn = null;
         [SerializeField]
@@ -15,6 +15,8 @@ namespace Mads
         private GameObject projectilePrefab = null;
 
         [Header("Parameters")]
+        [SerializeField]
+        private int iterations = 1;
         [SerializeField]
         private float width = 9.63f;
         [SerializeField]
@@ -27,33 +29,25 @@ namespace Mads
         [SerializeField]
         private float attraction = 4.83f;
         [SerializeField]
-        [Range(0f, 1f)]
-        private float energyConservation = 1f;
-        [SerializeField]
         private float timestep = 0.01f;
 
         private bool dirty = true;
-        private VerletIntegrator<LinkedTransformParticle> integrator;
-
-        public enum Simulate
-        {
-            Forward,
-            Disabled,
-            Backward
-        }
-        [SerializeField]
-        private Simulate simulate = Simulate.Forward;
+        private VerletIntegrator integrator;
 
         private void OnValidate()
         {
             width = Mathf.Max(0f, width);
             sweetSpot = Mathf.Max(0f, sweetSpot);
+            iterations = Mathf.Clamp(iterations, 1, 24);
             dirty = true;
         }
 
         private void Awake()
         {
-            integrator = new VerletIntegrator<LinkedTransformParticle>();
+            // Create integrator instance
+            integrator = new VerletIntegrator();
+            // Force parameter update
+            dirty = true;
         }
 
         private void Start()
@@ -65,12 +59,12 @@ namespace Mads
         {
             if (dirty)
             {
+                // Update integrator parameters
                 integrator.width = width;
                 integrator.sweetSpot = sweetSpot;
                 integrator.decay = decay;
                 integrator.repulsion = repulsion;
                 integrator.attraction = attraction;
-                integrator.energyConservation = energyConservation;
                 integrator.timestep = timestep;
                 dirty = false;
             }
@@ -79,43 +73,48 @@ namespace Mads
 
         public void Initialize()
         {
-            var transforms = spawner.SpawnLattice();
-            var particles = new List<LinkedTransformParticle>(transforms.Count);
-            foreach (var t in transforms)
+            // Spawn lattice
+            var transforms = latticeSpawner.SpawnLattice();
+            var positions = new List<Vector3>(transforms.Count);
+            var previousPositions = new List<Vector3>(transforms.Count);
+            var masses = new List<float>(transforms.Count);
+            foreach (var transform in transforms)
             {
-                var particle = new LinkedTransformParticle()
-                {
-                    transform = t,
-                    Position = t.position,
-                    PreviousPosition = t.position,
-                    Mass = 1f
-                };
-                particles.Add(particle);
+                positions.Add(transform.position);
+                previousPositions.Add(transform.position);
+                masses.Add(1f);
             }
 
+            // Spawn projectile
             var projectile = Instantiate(projectilePrefab, projectileSpawn.position, Quaternion.identity).transform;
-            var projectileParticle = new LinkedTransformParticle()
-            {
-                transform = projectile,
-                Position = projectile.position,
-                PreviousPosition = projectile.position - projectoleVelocity * timestep,
-                Mass = 5f
-            };
-            particles.Add(projectileParticle);
+            transforms.Add(projectile);
+            positions.Add(projectile.position);
+            previousPositions.Add(projectile.position - projectoleVelocity * timestep);
+            masses.Add(5f);
 
-            integrator.Particles = particles;
+            // Set integrator state
+            integrator.Transforms = transforms;
+            integrator.Positions = positions;
+            integrator.PreviousPositions = previousPositions;
+            integrator.Masses = masses;
         }
 
-        private void Step()
+    private void Step()
+    {
+        if (Input.GetKey(KeyCode.RightArrow))
         {
-            if (Input.GetKey(KeyCode.RightArrow))
+            for (int i = 0; i < iterations; i++)
             {
                 integrator.StepForward();
             }
-            else if (Input.GetKey(KeyCode.LeftArrow))
+        }
+        else if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            for (int i = 0; i < iterations; i++)
             {
                 integrator.StepBackward();
             }
         }
     }
+}
 }
