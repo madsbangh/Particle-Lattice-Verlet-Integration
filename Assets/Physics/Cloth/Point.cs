@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Alex.Maybe 
+namespace Cloth.Maybe 
 {
 	public class Point 
 	{

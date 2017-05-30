@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-namespace Mads
+namespace Atoms
 {
     [ExecuteInEditMode]
     public class LatticeSpawner : MonoBehaviour

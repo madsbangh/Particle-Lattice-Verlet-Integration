@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Mads
+namespace Atoms
 {
     public static class Formulas
     {

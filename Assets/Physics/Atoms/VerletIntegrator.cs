@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mads
+namespace Atoms
 {
     public class VerletIntegrator
     {
